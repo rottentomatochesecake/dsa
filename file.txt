@@ -1,1 +1,127 @@
-richard george
+#include <stdio.h>
+
+int A[20], size, front = -1, rear = -1;
+
+int isFull() {
+    return ((front == 0 && rear == size - 1) || (rear + 1) % size == front);
+}
+
+int isEmpty() {
+    return front == -1;
+}
+
+void ENQUEUE_REAR(int item) {
+    if (isFull()) {
+        printf("Queue is FULL. Insertion at rear is not possible.\n");
+    } else {
+        if (isEmpty()) {
+            front = rear = 0;
+        } else {
+            rear = (rear + 1) % size;
+        }
+        A[rear] = item;
+        printf("%d inserted at rear.\n", item);
+    }
+}
+
+void ENQUEUE_FRONT(int item) {
+    if (isFull()) {
+        printf("Queue is FULL. Insertion at front is not possible.\n");
+    } else {
+        if (isEmpty()) {
+            front = rear = 0;
+        } else {
+            front = (front - 1 + size) % size;
+        }
+        A[front] = item;
+        printf("%d inserted at front.\n", item);
+    }
+}
+
+void DEQUEUE_FRONT() {
+    if (isEmpty()) {
+        printf("Queue is EMPTY. Deletion from front is not possible.\n");
+    } else {
+        printf("Deleted item from front is %d\n", A[front]);
+        if (front == rear) {
+            front = rear = -1;
+        } else {
+            front = (front + 1) % size;
+        }
+    }
+}
+
+void DEQUEUE_REAR() {
+    if (isEmpty()) {
+        printf("Queue is EMPTY. Deletion from rear is not possible.\n");
+    } else {
+        printf("Deleted item from rear is %d\n", A[rear]);
+        if (front == rear) {
+            front = rear = -1;
+        } else {
+            rear = (rear - 1 + size) % size;
+        }
+    }
+}
+
+void DISPLAY() {
+    if (isEmpty()) {
+        printf("Queue is EMPTY.\n");
+    } else {
+        printf("Queue elements: ");
+        int i = front;
+        while (1) {
+            printf("%d ", A[i]);
+            if (i == rear) break;
+            i = (i + 1) % size;
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int item, opt;
+    printf("Enter the size of the Queue: ");
+    scanf("%d", &size);
+
+    do {
+        printf("\nEnter the option:\n");
+        printf("1. ENQUEUE at REAR\n");
+        printf("2. DEQUEUE from FRONT\n");
+        printf("3. DISPLAY\n");
+        printf("4. ENQUEUE at FRONT\n");
+        printf("5. DEQUEUE from REAR\n");
+        printf("6. EXIT\n");
+
+        scanf("%d", &opt);
+
+        switch (opt) {
+            case 1:
+                printf("Enter the item to insert at rear: ");
+                scanf("%d", &item);
+                ENQUEUE_REAR(item);
+                break;
+            case 2:
+                DEQUEUE_FRONT();
+                break;
+            case 3:
+                DISPLAY();
+                break;
+            case 4:
+                printf("Enter the item to insert at front: ");
+                scanf("%d", &item);
+                ENQUEUE_FRONT(item);
+                break;
+            case 5:
+                DEQUEUE_REAR();
+                break;
+            case 6:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid option..\n");
+        }
+    } while (opt != 6);
+
+    return 0;
+}
