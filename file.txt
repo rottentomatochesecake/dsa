@@ -1,40 +1,293 @@
 #include <stdio.h>
 
-int binarySearch(int arr[], int n, int target) {
-    int low = 0, high = n - 1;
+int A[50], size, front, rear;
 
-    while (low <= high) {
-        int mid = (low + high) / 2;
-
-        if (arr[mid] == target) {
-            return mid; // Target found
-        }
-        else if (arr[mid] < target) {
-            low = mid + 1; // Search right half
-        }
-        else {
-            high = mid - 1; // Search left half
-        }
+// ******** Normal Queue Functions ********
+void ENQUEUE(int item) {
+    if (rear == size - 1) {
+        printf("Queue is full. Insertion is not possible\n");
+    } else if (rear == -1) {
+        front = rear = 0;
+        A[rear] = item;
+    } else {
+        rear++;
+        A[rear] = item;
     }
-
-    return -1; // Not found
 }
 
-int main() {
-    int arr[] = {2, 4, 6, 8, 10, 12, 14};
-    int n = sizeof(arr) / sizeof(arr[0]);
-    int target;
-
-    printf("Enter the number to search: ");
-    scanf("%d", &target);
-
-    int result = binarySearch(arr, n, target);
-
-    if (result != -1) {
-        printf("Element found at index %d\n", result);
+void DEQUEUE() {
+    if (front == -1) {
+        printf("Queue is empty\n");
+    } else if (front == rear) {
+        printf("Deleted element: %d\n", A[front]);
+        front = rear = -1;
     } else {
-        printf("Element not found\n");
+        printf("Deleted element: %d\n", A[front]);
+        front++;
     }
+}
+
+void DISPLAY() {
+    if (front == -1) {
+        printf("Queue is empty\n");
+    } else {
+        for (int i = front; i <= rear; i++) {
+            printf("%d\t", A[i]);
+        }
+        printf("\n");
+    }
+}
+
+// ******** Circular Queue Functions ********
+void ENQUEUE_CQ(int item) {
+    if ((rear + 1) % size == front) {
+        printf("Circular Queue is full. Insertion is not possible\n");
+    } else if (rear == -1) {
+        front = rear = 0;
+        A[rear] = item;
+    } else {
+        rear = (rear + 1) % size;
+        A[rear] = item;
+    }
+}
+
+void DEQUEUE_CQ() {
+    if (front == -1) {
+        printf("Circular Queue is empty\n");
+    } else if (front == rear) {
+        printf("Deleted element: %d\n", A[front]);
+        front = rear = -1;
+    } else {
+        printf("Deleted element: %d\n", A[front]);
+        front = (front + 1) % size;
+    }
+}
+void DISPLAY_CQ() {
+    printf("Circular Queue: \n");
+    for (int i = 0; i < size; i++) {
+        if (front == -1) {
+            // Queue is empty
+            printf("[Empty]\t");
+        }
+        else if ((front <= rear && (i < front || i > rear)) ||
+                 (front > rear && (i > rear && i < front))) {
+            // These are the unused/empty spots
+            printf("[Empty]\t");
+        }
+        else {
+            // Occupied spots
+            printf("%d\t", A[i]);
+        }
+    }
+    printf("\n");
+}
+
+
+// ******** Deque Functions ********
+void PUSH_DQ(int item) { // Insert at front
+    int i;
+    if (front == 0 && rear == size - 1) {
+        printf("Deque is full. Insertion not possible\n");
+    } else if (rear == -1) {
+        front = rear = 0;
+        A[front] = item;
+    } else if (front > 0) {
+        front--;
+        A[front] = item;
+    } else {
+        for (i = rear; i >= front; i--) {
+            A[i + 1] = A[i];
+        }
+        A[front] = item;
+        rear++;
+    }
+}
+
+void INJECT_DQ(int item) { // Insert at rear
+    int i;
+    if (front == 0 && rear == size - 1) {
+        printf("Deque is full. Insertion not possible\n");
+    } else if (rear == -1) {
+        front = rear = 0;
+        A[rear] = item;
+    } else if (rear < size - 1) {
+        rear++;
+        A[rear] = item;
+    } else {
+        for (i = front; i <= rear; i++) {
+            A[i - 1] = A[i];
+        }
+        A[rear] = item;
+        front--;
+    }
+}
+
+void POP_DQ() { // Delete from front
+    if (front == -1) {
+        printf("Deque is empty\n");
+    } else if (front == rear) {
+        printf("Deleted element: %d\n", A[front]);
+        front = rear = -1;
+    } else {
+        printf("Deleted element: %d\n", A[front]);
+        front++;
+    }
+}
+
+void EJECT_DQ() { // Delete from rear
+    if (front == -1) {
+        printf("Deque is empty\n");
+    } else if (front == rear) {
+        printf("Deleted element: %d\n", A[rear]);
+        front = rear = -1;
+    } else {
+        printf("Deleted element: %d\n", A[rear]);
+        rear--;
+    }
+}
+
+void DISPLAY_DQ() {
+    if (front == -1) {
+        printf("Deque is empty\n");
+    } else {
+        for (int i = front; i <= rear; i++) {
+            printf("%d\t", A[i]);
+        }
+        printf("\n");
+    }
+}
+
+// ******** Main Function ********
+int main() {
+    int mainChoice, subChoice, item;
+    printf("Enter the size of the queue: ");
+    scanf("%d", &size);
+    front = rear = -1;
+
+    do {
+        printf("\n*** MAIN MENU ***\n");
+        printf("1. Normal Queue\n");
+        printf("2. Circular Queue\n");
+        printf("3. Double-Ended Queue (Deque)\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &mainChoice);
+
+        switch (mainChoice) {
+            case 1:
+                front = rear = -1;
+                do {
+                    printf("\n--- NORMAL QUEUE ---\n");
+                    printf("1. ENQUEUE\n");
+                    printf("2. DEQUEUE\n");
+                    printf("3. DISPLAY\n");
+                    printf("4. Back to Main Menu\n");
+                    printf("Enter your choice: ");
+                    scanf("%d", &subChoice);
+
+                    switch (subChoice) {
+                        case 1:
+                            printf("Enter the item: ");
+                            scanf("%d", &item);
+                            ENQUEUE(item);
+                            break;
+                        case 2:
+                            DEQUEUE();
+                            break;
+                        case 3:
+                            DISPLAY();
+                            break;
+                        case 4:
+                            printf("Returning to Main Menu...\n");
+                            break;
+                        default:
+                            printf("Invalid choice.\n");
+                    }
+                } while (subChoice != 4);
+                break;
+
+            case 2:
+                front = rear = -1;
+                do {
+                    printf("\n--- CIRCULAR QUEUE ---\n");
+                    printf("1. ENQUEUE\n");
+                    printf("2. DEQUEUE\n");
+                    printf("3. DISPLAY\n");
+                    printf("4. Back to Main Menu\n");
+                    printf("Enter your choice: ");
+                    scanf("%d", &subChoice);
+
+                    switch (subChoice) {
+                        case 1:
+                            printf("Enter the item: ");
+                            scanf("%d", &item);
+                            ENQUEUE_CQ(item);
+                            break;
+                        case 2:
+                            DEQUEUE_CQ();
+                            break;
+                        case 3:
+                            DISPLAY_CQ();
+                            break;
+                        case 4:
+                            printf("Returning to Main Menu...\n");
+                            break;
+                        default:
+                            printf("Invalid choice.\n");
+                    }
+                } while (subChoice != 4);
+                break;
+
+            case 3:
+                front = rear = -1;
+                do {
+                    printf("\n--- DOUBLE-ENDED QUEUE ---\n");
+                    printf("1. PUSH (Insert Front)\n");
+                    printf("2. POP (Delete Front)\n");
+                    printf("3. INJECT (Insert Rear)\n");
+                    printf("4. EJECT (Delete Rear)\n");
+                    printf("5. DISPLAY\n");
+                    printf("6. Back to Main Menu\n");
+                    printf("Enter your choice: ");
+                    scanf("%d", &subChoice);
+
+                    switch (subChoice) {
+                        case 1:
+                            printf("Enter the item: ");
+                            scanf("%d", &item);
+                            PUSH_DQ(item);
+                            break;
+                        case 2:
+                            POP_DQ();
+                            break;
+                        case 3:
+                            printf("Enter the item: ");
+                            scanf("%d", &item);
+                            INJECT_DQ(item);
+                            break;
+                        case 4:
+                            EJECT_DQ();
+                            break;
+                        case 5:
+                            DISPLAY_DQ();
+                            break;
+                        case 6:
+                            printf("Returning to Main Menu...\n");
+                            break;
+                        default:
+                            printf("Invalid choice.\n");
+                    }
+                } while (subChoice != 6);
+                break;
+
+            case 4:
+                printf("Exiting program...\n");
+                break;
+
+            default:
+                printf("Invalid choice. Try again.\n");
+        }
+    } while (mainChoice != 4);
 
     return 0;
 }
