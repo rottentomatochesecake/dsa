@@ -2,110 +2,91 @@
 #include<stdlib.h>
 #include<string.h>
 
-struct node
-{
-char url[100];
-struct node *prev;
-struct node *next;
+#define MAX 200
+
+struct node{
+char text[MAX];
+struct node *line;
 }node;
 
 struct node *head=NULL;
-struct node *current=NULL;
+struct node *tail=NULL;
 
-void visitpage(char *url){
-struct node* newnode = (struct node*)malloc(sizeof(struct node));
-strcpy(newnode->url,url);
-newnode->next=NULL;
-
+void add(char *text){
+struct node *newnode=(struct node*)malloc(sizeof(node));
+strcpy(newnode->text,text);
+newnode->line=NULL;
 if(head==NULL){
-newnode->prev=NULL;
-head=current=newnode;}
+tail=head=newnode;}
 else{
-newnode->prev=current;
-current->next=newnode;
-current=newnode;}
-printf("Visited: %s\n",current->url);}
-
-void back(){
-if(current!=NULL && current->prev!=NULL){
-current=current->prev;
-printf("Moved back to: %s\n",current->url);}
-else{
-printf("No previous page!\n");}}
-
-void forward(){
-if(current!=NULL && current->next!=NULL){
-current=current->next;
-printf("Moved forward to: %s\n",current->url);}
-else{
-printf("No forwarded page!\n");}}
+tail->line=newnode;
+tail=newnode;}}
 
 void display(){
-if(current!=NULL){
-printf("Current page is: %s\n",current->url);}
-else{
-printf("No page visited yet!\n");}}
-
-void history(){
-struct node *temp=current;
-if(current==NULL){
-printf("No page\n");}
-while(temp->prev!=NULL){
-temp=temp->prev;}
-printf("History:\n");
+if(head==NULL){
+printf("No texts available!");}
+struct node *temp=head;
 while(temp!=NULL){
-if(temp==current){
-printf("[%s]",temp->url);}
+printf("%s\n",temp->text);
+temp=temp->line;}}
+
+void replace(char *fw,char *rw){
+if(head==NULL){
+printf("No texts available!");
+return;}
+struct node *temp=head;
+int i=0;
+while(temp!=NULL){
+char buffer[MAX+100];
+char *pos,*start=temp->text;
+buffer[0]='\0';
+while((pos=strstr(start,fw))!=NULL){
+strncat(buffer,start,pos-start);
+strcat(buffer,rw);
+start=pos+strlen(fw);
+i=1;}
+strcat(buffer,start);
+strcpy(temp->text,buffer);
+temp=temp->line;}
+if(i==0){
+printf("No words matched!\n");}
 else{
-printf("%s",temp->url);}
-if(temp->next!=NULL){
-printf(" -> ");}
-temp=temp->next;}
-printf("\n");}
+printf("Successfully replaced!\n");}}
 
 int main(){
 int opt;
-char url[100];
+char text[MAX],fw[50],rw[50];
 int m=1;
 while(m==1){
-printf("\n\n\n1. Visit New Page\n");
-printf("2. Go Back\n");
-printf("3. Go Forward\n");
-printf("4. Current Page\n");
-printf("5. Browsing History\n");
-printf("6. Exit\n\n\n");
-printf("Enter your choice:");
+printf("\n\n1. Add new line\n");
+printf("2. Display\n");
+printf("3. Find & Replace\n");
+printf("4. Exit\n");
+printf("Enter the option:");
 scanf("%d",&opt);
+getchar();
 
 switch(opt){
-
 case 1:
-printf("Enter the URL:");
-scanf("%s",url);
-visitpage(url);
+printf("Enter the line:\n");
+fgets(text,sizeof(text),stdin);
+text[strcspn(text,"\n")]='\0';
+add(text);
 break;
-
 case 2:
-back();
-break;
-
-case 3:
-forward();
-break;
-
-case 4:
 display();
 break;
-
-case 5:
-history();
+case 3:
+printf("Enter word to find:");
+scanf("%s",fw);
+printf("Enter word to be replaced:");
+scanf("%s",rw);
+replace(fw,rw);
 break;
-
-case 6:
-printf("Exiting...\n");
+case 4:
+m=0;
 break;
-
 default:
-printf("Invalid Choice my man!\n");
-
-}}}
+printf("Invalid Option\n");
+}}
+return 0;}
