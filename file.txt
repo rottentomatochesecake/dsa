@@ -1,92 +1,140 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
-#define MAX 200
+// Structure for tree node
+struct Node {
+    char data;
+    struct Node* left;
+    struct Node* right;
+};
 
-struct node{
-char text[MAX];
-struct node *line;
-}node;
+// Function to create a new node
+struct Node* createNode(char data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
 
-struct node *head=NULL;
-struct node *tail=NULL;
+// Stack implementation for tree nodes
+struct Node* stack[100];
+int top = -1;
 
-void add(char *text){
-struct node *newnode=(struct node*)malloc(sizeof(node));
-strcpy(newnode->text,text);
-newnode->line=NULL;
-if(head==NULL){
-tail=head=newnode;}
-else{
-tail->line=newnode;
-tail=newnode;}}
+void push(struct Node* node) {
+    stack[++top] = node;
+}
 
-void display(){
-if(head==NULL){
-printf("No texts available!");}
-struct node *temp=head;
-while(temp!=NULL){
-printf("%s\n",temp->text);
-temp=temp->line;}}
+struct Node* pop() {
+    return stack[top--];
+}
 
-void replace(char *fw,char *rw){
-if(head==NULL){
-printf("No texts available!");
-return;}
-struct node *temp=head;
-int i=0;
-while(temp!=NULL){
-char buffer[MAX+100];
-char *pos,*start=temp->text;
-buffer[0]='\0';
-while((pos=strstr(start,fw))!=NULL){
-strncat(buffer,start,pos-start);
-strcat(buffer,rw);
-start=pos+strlen(fw);
-i=1;}
-strcat(buffer,start);
-strcpy(temp->text,buffer);
-temp=temp->line;}
-if(i==0){
-printf("No words matched!\n");}
-else{
-printf("Successfully replaced!\n");}}
+// Preorder Traversal (Prefix)
+void preorder(struct Node* root) {
+    if (root != NULL) {
+        printf("%c ", root->data);
+        preorder(root->left);
+        preorder(root->right);
+    }
+}
 
-int main(){
-int opt;
-char text[MAX],fw[50],rw[50];
-int m=1;
-while(m==1){
-printf("\n\n1. Add new line\n");
-printf("2. Display\n");
-printf("3. Find & Replace\n");
-printf("4. Exit\n");
-printf("Enter the option:");
-scanf("%d",&opt);
-getchar();
+// Postorder Traversal (Postfix)
+void postorder(struct Node* root) {
+    if (root != NULL) {
+        postorder(root->left);
+        postorder(root->right);
+        printf("%c ", root->data);
+    }
+}
 
-switch(opt){
-case 1:
-printf("Enter the line:\n");
-fgets(text,sizeof(text),stdin);
-text[strcspn(text,"\n")]='\0';
-add(text);
-break;
-case 2:
-display();
-break;
-case 3:
-printf("Enter word to find:");
-scanf("%s",fw);
-printf("Enter word to be replaced:");
-scanf("%s",rw);
-replace(fw,rw);
-break;
-case 4:
-m=0;
-break;
-default:
-printf("Invalid Option\n");
-}}
-return 0;}
+// Build Expression Tree from Postfix Expression
+struct Node* buildTree(char postfix[]) {
+    for (int i = 0; i < strlen(postfix); i++) {
+        char ch = postfix[i];
+
+        if (isalnum(ch)) { // Operand
+            struct Node* operandNode = createNode(ch);
+            push(operandNode);
+        } else { // Operator
+            struct Node* operatorNode = createNode(ch);
+
+            struct Node* rightChild = pop();
+            struct Node* leftChild = pop();
+
+            operatorNode->right = rightChild;
+            operatorNode->left = leftChild;
+
+            push(operatorNode);
+        }
+    }
+    return pop(); // Root of the tree
+}
+
+#include <stdio.h>
+#include <string.h>
+
+void findAndReplace(char str[], char find[], char replace[]) {
+    char result[1000];   // final string
+    int i = 0, j = 0, k;
+    int findLen = strlen(find);
+    int replaceLen = strlen(replace);
+
+    while (str[i] != '\0') {
+        // Check if substring matches
+        if (strstr(&str[i], find) == &str[i]) {
+            // Copy replacement into result
+            for (k = 0; k < replaceLen; k++) {
+                result[j++] = replace[k];
+            }
+            i += findLen; // skip past the word we replaced
+        } else {
+            result[j++] = str[i++];
+        }
+    }
+    result[j] = '\0';
+
+    // Copy result back into original string
+    strcpy(str, result);
+}
+
+int main() {
+    char text[1000], find[100], replace[100];
+
+    printf("Enter text: ");
+    fgets(text, sizeof(text), stdin);
+
+    // remove newline if present
+    text[strcspn(text, "\n")] = '\0';
+
+    printf("Enter word to find: ");
+    scanf("%s", find);
+
+    printf("Enter replacement word: ");
+    scanf("%s", replace);
+
+    findAndReplace(text, find, replace);
+
+    printf("\nUpdated Text: %s\n", text);
+
+    return 0;
+}
+
+int main() {
+    char postfix[100];
+
+    printf("Enter postfix expression: ");
+    scanf("%s", postfix);
+
+    struct Node* root = buildTree(postfix);
+
+    printf("Prefix expression: ");
+    preorder(root);
+    printf("\n");
+
+    printf("Postfix expression: ");
+    postorder(root);
+    printf("\n");
+
+    return 0;
+}
